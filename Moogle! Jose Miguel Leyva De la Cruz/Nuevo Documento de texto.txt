@@ -1,0 +1,47 @@
+Proyecto de Programación 1er Año de Ciencias de la Computación: Moogle!
+
+ Moogle! es una herramienta de búsqueda inteligente, el cual usa nociones de algunos SRI para su funcionamiento. El objetivo de este proyecto es implementar un conjunto de métodos, agrupados en una librería de clases, los cuales harán posible el uso y funcionamiento de esta herramienta.
+Este informa tratará de realizar una breve explicación sobre el código en el cual está basado este buscador tan original.
+
+Clase DataServer:
+ Esta clase tiene el objetivo de guardar dos estructuras las cuales serán de gran importancia para funcionalidad del proyecto. La primera se trata de una constante de tipo de string llamada Delimitors y la segunda es un objeto de tipo BBDD, el cual será explicado a continuación.
+
+Clase BBDD:
+ Esta clase tiene como objetivo principal, manejar y cargar la base de datos de nuestro buscador, en otras palabras es la encargada de cargar todos los documentos sobre los cuales nuestra herramienta de búsqueda realizará sus operaciones. La clase en su totalidad cuenta con tres propiedades fundamentales:
+
+1- Larousse: Es un Diccionario en el cual su valor Key es una palabra y su Value sera otro Diccionario, siendo el key de este último la ruta del documento, y el value la cantidad de veces que la palabra (key de Luarensse) aparece en dicho documento.
+2-TF_IDF: Es similar a Laurensse, la unica diferencia es que aporta en lugar de la cantidad de veces que una palabra se repite en un documento, el TF-IDF de dicha palabra con respecto al documento actual.
+3-Infos: Este ultimo diccionario guarda en sus Keys la ruta del documento y sus Values seran objetos de tipo InfoDocument (será explicado mas adelante). 
+
+ El constructor de la clase BBDD, recibe en uno de sus parametros la ruta en donde estan almacenados los documentos sobre los cuales vamos a buscar una informacion.
+
+Cargar la Base de Datos:
+-Dentro de la propia clase BBDD aparece el metodo AddFile, el cual de manera iterativa analiza cada uno de los documentos que se encuentran en la carpeta content. Usando la constante Delimitors convierte el contenido del documento en un array de palabras, itera por todas estas palabras y va actualizando Laurensse siguiendo una serie de condiciones (Si la palabra aun no se habia guardado en los Keys, Si la palabra ya se habia guardado pero estamos en otro documento, Si la palabra ya estaba y seguimos en el mismo documento). OJO: Este proceso consume mucho tiempo, por esto para una mejor experiencia durante la busqueda, se llamara a este metodo antes de inicializar la aplicacion !Moogle.
+
+Cargar Infos:
+-Este último Diccionario se va ´llenando´, a medida que el metodo AddFile realice una iteración. Entonces guarda en sus Keys las rutas de los distintos documentos y en sus Values objetos de Tipo InfoDocuments. Estos objetos tienen en su constructor las siguientes propiedades:
+1 - double norma: La norma se obtiene al Vectorizar el documento, dicho vector estará representado por todas las palabras, sin repetir, del documento y sus coeficientes serán la cantidad de veces que estas palabras se repiten en el documento Ejemplo: Un documento que posee 8 palabras en total, pero hay una que se repite 5 veces y la otra 3, este documento tendrá como vector V=(5,3). Una vez vectorizado el Documento, aplicamos la formula de norma en algebra, la cual consiste en elevar cada coeficiente al cuadrado, sumar los resultados y a ese ultimo numero hallarle su raiz cuadrada.
+2 - int index: Este valor almacena la posicion del documento en el Diccionario.
+3 - string cuerpo: Guarda el texto del documento mediante el metodo ReadAllText de la clase File. Para evitar equivocaciones a la hora de realizar la búsqueda, este documento se guardará en su forma primitiva, es decir le aplicaremos el metodo ToLower de la clase String de C#.
+
+Cargar TF_IDF:
+Para hacerlo iteraremos por las Keys de Larousse y realizremos el calculo correspondiente para cada uno de sus documentos, el cual consta de dos partes.
+-Parte TF: Dividimos la cantidad de veces que una palabra aparece en un documento entre la cantidad de terminos que posee el documento
+-Parte IDF: Calculamos el Log10 de la cantidad total de documentos, entre la cantidad de documentos en los que aparece la palabra.
+Finalmente multiplicamos estos dos valores y obtenemos el TF_IDF de la palabra con respecto al documento.
+La misma forma se repite para cada palabra y para cada documento que esta palabra tenga asociada.
+
+Clases WordInfo y Operators
+Estas dos clases trabajan en conjunto y nos permiten obtener informacion sobre las palabras que el usuario introduce en la query. Esta informacion corresponde principalmente a los operadores de busqueda. La clase WordInfo recibe en su constructor solamente la palabra y le asigna valores por defecto, mientras que la clase Operators modifica esos valores por defecto segun la existencia o inexistencia de algun operador. 
+
+Clase Moogle
+Una vez cargada la base de datos, calculados los TF-IDF de cada palabra de la misma y haber conocido la informacion de cada documento, esta clase esta lista para comenzar a trabajar.
+-Lo primero es convertir la query en una lista de WordInfo. Separamos la query por espacios y segun la informacion de cada palabra vamos llenando esta Lista.
+-Score: La evaluación del Score, para esto aplicaremos la formula del coseno de similitud entre dos vectores. Vectorizamos la query del mismo modo que vectorizamos el documento, luego multiplicamos cada coeficiente del vector query por los coeficientes del vector TF-IDF, luego dividimos este resultado entre la multiplicacion de las norma del Vector query y el Vector Documento. De esta manera obtenemos el coseno que existe entre estos dos vectores. Entonces mientras mayor sea el numero obtenido, mas pequeño será el ángulo que forman estos vectores, por tanto estaran mas cerca uno del otro.
+-Snippet: Para que el resultado de búsqueda sea lo mas satisfactorio posible, este snippet devuelve la porción del documento que mas relevancia tenga con respecto a la query introducida. Para esto tenemos el método SnippetPlus de la clase Moogle, el cual de manera iterativa se encarga de este trabajo. Obtiene el numero de palabras de la query que hay en cada fragmento del documento y hace corresponder dicho fragmento con este numero, luego devuelve el snippet al que le corresponda el mayor numero de la palabras de la query que este posea.
+
+-Sugerencia: Llama a la clase Levensthein, la cual posee el metodo DisLevensthein, el cual de manera recursiva utiliza el algoritmo de Levensthein para obtener la palabra almacenda en Laurosse que mas se asemeja a la busqueda. Esta clase solo se llama si la palabra no aparece en los Keys de Larousse de la clase BBDD.
+
+Finalmente. Una vez realizados todos los calculos de los scores, obtenido el snippet, y el titulo de los documentos. Creamos el array de SearchItem, lo ordenamos segun el valor de los Scores y devolvemos los 10 primeros. De esta manera el resultado de la búsqueda no estará tan cargado de documentos innecesarios.
+
+José Miguel Leyva De la Cruz C111
