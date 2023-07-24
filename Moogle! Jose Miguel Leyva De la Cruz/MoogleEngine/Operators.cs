@@ -40,7 +40,13 @@ public class Operators
                     NEW.isimportant = true;
                     index++;
                 }
-                NEW.asther = spliter[i].Where(actual => actual > index).TakeWhile(x => x == '*').Count() + 1;
+                if(spliter[i][index]=='*')
+                {
+                    for (int j = index; spliter[i][j]=='*'; j++)
+                    {
+                        NEW.asther += 1;
+                    }
+                }
                 string[] clearing = spliter[i].Split(operators.ToArray());
                 NEW.word = clearing[clearing.Length - 1];
                 result[i] = NEW;

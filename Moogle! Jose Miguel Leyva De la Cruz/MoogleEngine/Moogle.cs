@@ -61,8 +61,8 @@ public static class Moogle
             foreach (var element in DataServer.BaseDeDatos.Infos.Values)
             {
                 //Operador *
-                score[element.index] *= Result[indexresul].asther;
                 score[element.index] /= (normaQuery * element.norma);
+                score[element.index] *= Result[indexresul].asther;
                 score[element.index] += nearscore[element.index];
             }
             indexresul++;
@@ -83,7 +83,7 @@ public static class Moogle
             {
                 if (!item.ishere) //La palabra no puede aparecer
                 {
-                    if (document.Value.cuerpo.Contains(item.word))
+                    if (document.Value.cuerpo.Split().Contains(item.word))
                     {
                         //Si el documento que estoy analizando actualmente contiene la palabra, su escore se convierte en 0
                         //Asi aseguro no devolverlo en los resultados de busqueda.
@@ -95,13 +95,14 @@ public static class Moogle
                     {
                         //Aqui si el documento no contiene la palabra, aumento su score en 1
                         //Esto lo hice para el caso en que la query estuviera compuesta por una sola palabra y esta a su vez tuviera el operador !
+                        if(scores[document.Value.index] != 0)
                         finalresult[document.Value.index] = new SearchItem(tittle, snippet, (float)scores[document.Value.index] + 1);
                         continue;
                     }
                 }
                 if (item.isimportant)
                 {
-                    if (!document.Value.cuerpo.Contains(item.word))
+                    if (!document.Value.cuerpo.Split().Contains(item.word))
                     {
                         //Reduzco el Score si el documento no contiene la palabra
                         finalresult[document.Value.index] = new SearchItem(tittle, snippet, 0);

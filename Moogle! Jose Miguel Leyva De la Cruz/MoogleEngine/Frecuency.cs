@@ -11,7 +11,7 @@ public class Frecuency
         Dictionary<string, double> ToReturn = new Dictionary<string, double>();
         foreach (var item in vector)
         {
-            string[] full = documents[item.Key].cuerpo.Split(DataServer.Delimitors, StringSplitOptions.RemoveEmptyEntries);
+            string[] full = documents[item.Key].cuerpo.Split((DataServer.Delimitors + ' ').ToArray(),StringSplitOptions.RemoveEmptyEntries);
             ToReturn.Add(item.Key, TF_IDF(item.Value, full.Length, totalfichers, vector.Count));
         }
         return ToReturn;
